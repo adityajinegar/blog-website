@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 
+const Blog = require("./models/blog");
+
 // express app
 const app = express();
 
@@ -16,25 +18,27 @@ mongoose
 // register view engine
 app.set("view engine", "ejs");
 
+// middleware & static files
 app.use(express.static("public"));
 app.use(morgan("dev"));
 
+// routes
 app.get("/", (req, res) => {
-  const blogs = [
-    {
-      title: "Aditya finds stars",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-    {
-      title: "Rinkal finds eggs",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-  ];
-  res.render("index", { title: "Home", blogs: blogs });
+  res.redirect("/blogs");
 });
 
 app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
+});
+
+// blog routes
+app.get("/blogs", (req, res) => {
+  Blog.find()
+    .sort({ createdAt: -1 })
+    .then((result) => {
+      res.render("index", { title: "All Blogs", blogs: result });
+    })
+    .catch((err) => console.log(err));
 });
 
 app.get("/blogs/create", (req, res) => {
